@@ -1,0 +1,760 @@
+version: '3.9'
+
+# =============================================================
+# STARK INDUSTRIES SQL — Docker Compose
+# Educational cybersecurity training platform.
+# FOR AUTHORIZED EDUCATIONAL USE ONLY.
+# =============================================================
+
+networks:
+  stark-frontend:
+    driver: bridge
+  stark-backend:
+    driver: bridge
+  stark-challenges:
+    driver: bridge
+  stark-oob:
+    driver: bridge
+    internal: true   # No external access for OOB network
+
+volumes:
+  postgres-platform-data:
+  mysql-challenge-data:
+  postgres-challenge-data:
+  mssql-challenge-data:
+  redis-data:
+
+services:
+
+  # ─────────────────────────────────────────────
+  # FRONTEND — React + TypeScript + Tailwind
+  # ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stark-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - VITE_API_URL=http://localhost:${BACKEND_PORT:-8000}
+      - VITE_WS_URL=ws://localhost:${BACKEND_PORT:-8000}
+    networks:
+      - stark-frontend
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─────────────────────────────────────────────
+  # BACKEND — FastAPI
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stark-backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker SDK for lab management
+      - ./backend:/app
+    networks:
+      - stark-frontend
+      - stark-backend
+      - stark-challenges
+    depends_on:
+      postgres-platform:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  # PLATFORM DATABASE — PostgreSQL
+  # ─────────────────────────────────────────────
+  postgres-platform:
+    image: postgres:15-alpine
+    container_name: stark-postgres-platform
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stark_platform}
+      POSTGRES_USER: ${POSTGRES_USER:-stark_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stark_db_password_lab}
+    volumes:
+      - postgres-platform-data:/var/lib/postgresql/data
+      - ./backend/init-platform-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stark-backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stark_user} -d ${POSTGRES_DB:-stark_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  # REDIS — Session / Rate Limiting / Events
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: stark-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - stark-backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ─────────────────────────────────────────────
+  # CHALLENGE DATABASES
+  # ─────────────────────────────────────────────
+  mysql-challenge:
+    image: mysql:8.0
+    container_name: stark-mysql-challenge
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_mysql_lab_pw}
+      MYSQL_DATABASE: ${MYSQL_DB:-stark_lab}
+      MYSQL_USER: ${MYSQL_USER:-lab_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-lab_mysql_password}
+    volumes:
+      - mysql-challenge-data:/var/lib/mysql
+      - ./challenges/shared/mysql-seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_mysql_lab_pw}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres-challenge:
+    image: postgres:15-alpine
+    container_name: stark-postgres-challenge
+    environment:
+      POSTGRES_DB: ${PGSQL_CHALLENGE_DB:-stark_challenge_db}
+      POSTGRES_USER: ${PGSQL_CHALLENGE_USER:-challenge_user}
+      POSTGRES_PASSWORD: ${PGSQL_CHALLENGE_PASSWORD:-challenge_pg_password}
+    volumes:
+      - postgres-challenge-data:/var/lib/postgresql/data
+      - ./challenges/shared/postgres-seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGSQL_CHALLENGE_USER:-challenge_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mssql-challenge:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: stark-mssql-challenge
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${MSSQL_SA_PASSWORD:-StarkLab@Sql2024!}
+      MSSQL_PID: Express
+    volumes:
+      - mssql-challenge-data:/var/opt/mssql
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${MSSQL_SA_PASSWORD:-StarkLab@Sql2024!}' -Q 'SELECT 1' -No 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # ─────────────────────────────────────────────
+  # OOB LISTENER — Challenge 07 internal callback
+  # ─────────────────────────────────────────────
+  oob-listener:
+    build:
+      context: ./oob-listener
+      dockerfile: Dockerfile
+    container_name: stark-oob-listener
+    networks:
+      - stark-oob
+      - stark-challenges
+    restart: unless-stopped
+    environment:
+      - OOB_PORT=8888
+      - REDIS_URL=${REDIS_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ─────────────────────────────────────────────
+  # CHALLENGE CONTAINERS (01-30)
+  # ─────────────────────────────────────────────
+  ch01-basic:
+    build: ./challenges/ch01-basic
+    container_name: stark-ch01
+    ports:
+      - "${CH01_PORT:-8001}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH01}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch02-auth-bypass:
+    build: ./challenges/ch02-auth-bypass
+    container_name: stark-ch02
+    ports:
+      - "${CH02_PORT:-8002}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH02}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch03-error-based:
+    build: ./challenges/ch03-error-based
+    container_name: stark-ch03
+    ports:
+      - "${CH03_PORT:-8003}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH03}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch04-union:
+    build: ./challenges/ch04-union
+    container_name: stark-ch04
+    ports:
+      - "${CH04_PORT:-8004}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH04}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch05-boolean-blind:
+    build: ./challenges/ch05-boolean-blind
+    container_name: stark-ch05
+    ports:
+      - "${CH05_PORT:-8005}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH05}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch06-time-blind:
+    build: ./challenges/ch06-time-blind
+    container_name: stark-ch06
+    ports:
+      - "${CH06_PORT:-8006}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH06}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch07-oob:
+    build: ./challenges/ch07-oob
+    container_name: stark-ch07
+    ports:
+      - "${CH07_PORT:-8007}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH07}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+      - OOB_HOST=oob-listener
+      - OOB_PORT=8888
+    networks:
+      - stark-challenges
+      - stark-oob
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+      oob-listener:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ch08-second-order:
+    build: ./challenges/ch08-second-order
+    container_name: stark-ch08
+    ports:
+      - "${CH08_PORT:-8008}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH08}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch09-stacked:
+    build: ./challenges/ch09-stacked
+    container_name: stark-ch09
+    ports:
+      - "${CH09_PORT:-8009}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH09}
+      - PGSQL_HOST=postgres-challenge
+      - PGSQL_USER=${PGSQL_CHALLENGE_USER:-challenge_user}
+      - PGSQL_PASSWORD=${PGSQL_CHALLENGE_PASSWORD:-challenge_pg_password}
+      - PGSQL_DB=${PGSQL_CHALLENGE_DB:-stark_challenge_db}
+    networks:
+      - stark-challenges
+    depends_on:
+      postgres-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch10-stored-proc:
+    build: ./challenges/ch10-stored-proc
+    container_name: stark-ch10
+    ports:
+      - "${CH10_PORT:-8010}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH10}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch11-insert:
+    build: ./challenges/ch11-insert
+    container_name: stark-ch11
+    ports:
+      - "${CH11_PORT:-8011}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH11}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch12-update:
+    build: ./challenges/ch12-update
+    container_name: stark-ch12
+    ports:
+      - "${CH12_PORT:-8012}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH12}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch13-delete:
+    build: ./challenges/ch13-delete
+    container_name: stark-ch13
+    ports:
+      - "${CH13_PORT:-8013}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH13}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch14-orderby:
+    build: ./challenges/ch14-orderby
+    container_name: stark-ch14
+    ports:
+      - "${CH14_PORT:-8014}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH14}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch15-where:
+    build: ./challenges/ch15-where
+    container_name: stark-ch15
+    ports:
+      - "${CH15_PORT:-8015}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH15}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch16-like:
+    build: ./challenges/ch16-like
+    container_name: stark-ch16
+    ports:
+      - "${CH16_PORT:-8016}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH16}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch17-numeric:
+    build: ./challenges/ch17-numeric
+    container_name: stark-ch17
+    ports:
+      - "${CH17_PORT:-8017}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH17}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch18-string:
+    build: ./challenges/ch18-string
+    container_name: stark-ch18
+    ports:
+      - "${CH18_PORT:-8018}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH18}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch19-json-api:
+    build: ./challenges/ch19-json-api
+    container_name: stark-ch19
+    ports:
+      - "${CH19_PORT:-8019}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH19}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch20-header:
+    build: ./challenges/ch20-header
+    container_name: stark-ch20
+    ports:
+      - "${CH20_PORT:-8020}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH20}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch21-cookie:
+    build: ./challenges/ch21-cookie
+    container_name: stark-ch21
+    ports:
+      - "${CH21_PORT:-8021}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH21}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch22-hpp:
+    build: ./challenges/ch22-hpp
+    container_name: stark-ch22
+    ports:
+      - "${CH22_PORT:-8022}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH22}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch23-waf-bypass:
+    build: ./challenges/ch23-waf-bypass
+    container_name: stark-ch23
+    ports:
+      - "${CH23_PORT:-8023}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH23}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch24-filter-bypass:
+    build: ./challenges/ch24-filter-bypass
+    container_name: stark-ch24
+    ports:
+      - "${CH24_PORT:-8024}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH24}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch25-second-order-auth:
+    build: ./challenges/ch25-second-order-auth
+    container_name: stark-ch25
+    ports:
+      - "${CH25_PORT:-8025}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH25}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch26-multi-db:
+    build: ./challenges/ch26-multi-db
+    container_name: stark-ch26
+    ports:
+      - "${CH26_PORT:-8026}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH26}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+      - PGSQL_HOST=postgres-challenge
+      - PGSQL_USER=${PGSQL_CHALLENGE_USER:-challenge_user}
+      - PGSQL_PASSWORD=${PGSQL_CHALLENGE_PASSWORD:-challenge_pg_password}
+      - PGSQL_DB=${PGSQL_CHALLENGE_DB:-stark_challenge_db}
+      - MSSQL_HOST=mssql-challenge
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-StarkLab@Sql2024!}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+      postgres-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ch27-sqlite:
+    build: ./challenges/ch27-sqlite
+    container_name: stark-ch27
+    ports:
+      - "${CH27_PORT:-8027}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH27}
+    networks:
+      - stark-challenges
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  ch28-mysql:
+    build: ./challenges/ch28-mysql
+    container_name: stark-ch28
+    ports:
+      - "${CH28_PORT:-8028}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH28}
+      - MYSQL_HOST=mysql-challenge
+      - MYSQL_USER=${MYSQL_USER:-lab_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-lab_mysql_password}
+      - MYSQL_DB=${MYSQL_DB:-stark_lab}
+    networks:
+      - stark-challenges
+    depends_on:
+      mysql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch29-postgresql:
+    build: ./challenges/ch29-postgresql
+    container_name: stark-ch29
+    ports:
+      - "${CH29_PORT:-8029}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH29}
+      - PGSQL_HOST=postgres-challenge
+      - PGSQL_USER=${PGSQL_CHALLENGE_USER:-challenge_user}
+      - PGSQL_PASSWORD=${PGSQL_CHALLENGE_PASSWORD:-challenge_pg_password}
+      - PGSQL_DB=${PGSQL_CHALLENGE_DB:-stark_challenge_db}
+    networks:
+      - stark-challenges
+    depends_on:
+      postgres-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ch30-mssql:
+    build: ./challenges/ch30-mssql
+    container_name: stark-ch30
+    ports:
+      - "${CH30_PORT:-8030}:5000"
+    environment:
+      - CHALLENGE_FLAG=${FLAG_CH30}
+      - MSSQL_HOST=mssql-challenge
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-StarkLab@Sql2024!}
+      - MSSQL_DB=${MSSQL_DB:-StarkLabDB}
+    networks:
+      - stark-challenges
+    depends_on:
+      mssql-challenge:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10

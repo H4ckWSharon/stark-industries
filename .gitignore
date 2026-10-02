@@ -1,0 +1,57 @@
+# Environment files - NEVER commit these
+.env
+*.env.local
+*.env.production
+
+# Docker volumes & data
+postgres-data/
+mysql-data/
+redis-data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Node / Frontend build
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates & keys
+*.pem
+*.key
+*.crt
+
+# Temp
+tmp/
+temp/
+scratch/

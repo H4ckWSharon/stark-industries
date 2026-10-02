@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0a0a0f] text-[#e6edf3] font-mono selection:bg-[#ff2244] selection:text-[#ffffff];
+  }
+}
+
+/* Arc Reactor Pulse Animation */
+@keyframes arc-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4), inset 0 0 15px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(0, 212, 255, 0.8), inset 0 0 25px rgba(0, 212, 255, 0.6);
+  }
+}
+
+@keyframes core-glow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes hud-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.animate-arc-pulse {
+  animation: arc-pulse 2.5s infinite ease-in-out;
+}
+
+.animate-core-glow {
+  animation: core-glow 2s infinite ease-in-out;
+}
+
+/* HUD Glassmorphism & Borders */
+.hud-card-red {
+  background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(35, 10, 15, 0.9) 100%);
+  border: 1px solid rgba(255, 34, 68, 0.4);
+  box-shadow: 0 0 20px rgba(255, 34, 68, 0.15);
+}
+
+.hud-card-gold {
+  background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(35, 30, 10, 0.9) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+.hud-card-cyan {
+  background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(10, 30, 40, 0.9) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+/* Custom Cyber Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2f3a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff2244;
+}
