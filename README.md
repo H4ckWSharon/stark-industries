@@ -1,12 +1,8 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="Stark Industries SQL" width="780" />
+<img src="assets/banner.png" alt="Stark Industries SQL" width="780" style="max-width: 100%; border-radius: 10px;" />
 
 <br/><br/>
-
-<img src="assets/arc-reactor.svg" alt="Arc Reactor" width="130" />
-
-<br/>
 
 <img src="assets/typing-banner.svg" alt="Stark Industries Cyber Range" width="850" />
 
@@ -20,23 +16,6 @@
 [![License](https://img.shields.io/badge/License-Educational-FF2244?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#)
 
 <br/><br/>
-
-<img src="assets/hud-status.svg" alt="HUD Status" width="850" />
-
-<br/><br/>
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║   ██████ ████████  █████  ██████  ██   ██                   ║
-║  ██         ██    ██   ██ ██   ██ ██  ██                    ║
-║   █████     ██    ███████ ██████  █████                     ║
-║       ██    ██    ██   ██ ██   ██ ██  ██                    ║
-║  ██████     ██    ██   ██ ██   ██ ██   ██                   ║
-║                                                              ║
-║     INDUSTRIES  SQL  INJECTION  CYBER  RANGE                ║
-║              // MARK VIII  // AUTHORIZED USE ONLY           ║
-╚══════════════════════════════════════════════════════════════╝
-```
 
 <img src="assets/cyber-divider.svg" alt="Divider" width="100%" />
 
@@ -291,44 +270,42 @@ stark-industries/
 
 ## ⚠️ Legal Disclaimer
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║  FOR EDUCATIONAL AND AUTHORIZED TESTING PURPOSES ONLY           ║
-║                                                                  ║
-║  All challenge applications are INTENTIONALLY VULNERABLE.       ║
-║  Run ONLY on your local machine or isolated lab environment.    ║
-║  Do NOT expose these containers to the public internet.         ║
-║  The authors are not responsible for misuse.                    ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+> [!CAUTION]
+> **FOR EDUCATIONAL AND AUTHORIZED LAB TESTING ONLY**
+> 
+> All 30 challenge applications are **intentionally vulnerable**. Run only on your local machine or in an isolated lab environment. Do **NOT** expose these containers to the public internet. The author is not responsible for misuse.
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Built by Sharon Anil
 
 <div align="center">
 
-<img src="assets/author-card.svg" alt="Built by Sharon Anil" width="850" />
+<img src="assets/skills-animation.svg" alt="Sharon Anil Skills" width="850" />
 
 <br/><br/>
 
-### Built by **Sharon Anil**
-**Ethical Hacker & Pentester** · **CTF Player** · **Developer & Web Developer** · **Hardware Hacking**
+### **Sharon Anil**
+#### 🛡️ Ethical Hacker & Pentester · 🚩 CTF Player · 💻 Developer & Web Developer · 🔌 Hardware Hacking
 
 <br/>
 
-[![YouTube](https://img.shields.io/badge/YouTube-@HackWSharon-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@HackWSharon)
-[![GitHub](https://img.shields.io/badge/GitHub-H4ckWSharon-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/H4ckWSharon)
-
-<br/>
-
-[![Ethical Hacker](https://img.shields.io/badge/Role-Ethical%20Hacker-FF2244?style=for-the-badge&logo=kalilinux&logoColor=white)](https://www.youtube.com/@HackWSharon)
-[![Pentester](https://img.shields.io/badge/Skill-Pentester-FFD700?style=for-the-badge&logo=target&logoColor=black)](https://www.youtube.com/@HackWSharon)
-[![CTF Player](https://img.shields.io/badge/CTF-Player-00D4FF?style=for-the-badge&logo=flag&logoColor=black)](https://github.com/H4ckWSharon)
-[![Web Developer](https://img.shields.io/badge/Role-Web%20Developer-00FF88?style=for-the-badge&logo=react&logoColor=black)](https://github.com/H4ckWSharon)
-[![Hardware Hacking](https://img.shields.io/badge/Specialty-Hardware%20Hacking-FF6B00?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.youtube.com/@HackWSharon)
+[![YouTube Channel](https://img.shields.io/badge/YouTube-@HackWSharon-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@HackWSharon)
+[![GitHub Profile](https://img.shields.io/badge/GitHub-H4ckWSharon-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/H4ckWSharon)
 
 <br/><br/>
+
+[![Ethical Hacker](https://img.shields.io/badge/🛡️_Ethical_Hacker-E62429?style=for-the-badge&logo=kalilinux&logoColor=white)](https://www.youtube.com/@HackWSharon)
+[![Pentester](https://img.shields.io/badge/🎯_Skill-Pentester-FFB800?style=for-the-badge&logo=target&logoColor=black)](https://www.youtube.com/@HackWSharon)
+[![CTF Player](https://img.shields.io/badge/🚩_CTF-Player-00A8FF?style=for-the-badge&logo=flag&logoColor=white)](https://github.com/H4ckWSharon)
+[![Web Developer](https://img.shields.io/badge/💻_Web-Developer-00D47E?style=for-the-badge&logo=react&logoColor=white)](https://github.com/H4ckWSharon)
+[![Hardware Hacking](https://img.shields.io/badge/🔌_Hardware-Hacking-FF6B00?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.youtube.com/@HackWSharon)
+
+<br/><br/>
+
+> 📺 **Subscribe on YouTube:** [youtube.com/@HackWSharon](https://www.youtube.com/@HackWSharon) — Ethical Hacking, CTF Walkthroughs & Cyber Defense tutorials!
+
+<br/>
 
 <img src="assets/cyber-divider.svg" alt="Divider" width="100%" />
 
@@ -341,9 +318,5 @@ stark-industries/
 **⚡ STARK INDUSTRIES RESEARCH DIVISION · MARK VIII CYBER RANGE ⚡**
 
 *"Sometimes you gotta run before you can walk." — Tony Stark*
-
-<br/>
-
-<img src="assets/arc-reactor.svg" alt="Arc Reactor" width="80" />
 
 </div>
