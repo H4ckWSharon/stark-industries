@@ -1,8 +1,11 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=40&duration=3000&pause=1000&color=FF2244&center=true&vCenter=true&width=900&height=80&lines=⚡+STARK+INDUSTRIES+SQL;Iron+Man+Cyber+Range;SQL+Injection+Training+Platform" alt="Stark Industries SQL" />
+<img src="assets/banner.png" alt="Stark Industries SQL" width="750" />
 
-<img src="https://readme-typing-svg.demolab.com?font=Share+Tech+Mono&size=18&duration=2000&pause=500&color=00D4FF&center=true&vCenter=true&width=700&lines=30+Challenges+%7C+6+Attack+Categories+%7C+4+Database+Engines;Built+for+Red+Team+%26+Cybersecurity+Training;Powered+by+Docker+%7C+FastAPI+%7C+React" alt="Subtitle" />
+<br/>
+
+# ⚡ STARK INDUSTRIES SQL
+### SQL Injection Cyber Range · 30 Vulnerable Labs · 4 Database Engines
 
 <br/>
 
@@ -34,7 +37,7 @@
 
 ## ⚡ What Is This?
 
-**STARK INDUSTRIES SQL** is a fully self-hosted, **Iron Man–themed SQL Injection training platform** built for cybersecurity students, red teamers, and instructors. It features **30 deliberately vulnerable challenge labs** across **4 database engines**, wrapped in a stunning JARVIS HUD interface.
+**STARK INDUSTRIES SQL** is a fully self-hosted **SQL Injection training platform** built for cybersecurity students, red teamers, and instructors. It features **30 deliberately vulnerable challenge labs** across **4 database engines**, wrapped in a stunning JARVIS HUD interface.
 
 > Think of it as **Hack The Box**, but purpose-built for SQL injection — running entirely on your local machine in Docker containers.
 
@@ -169,8 +172,7 @@ Register with any username and password you choose, then start hacking!
 
 | Account | How to Create |
 |---|---|
-| 🎓 **Student** | Register on the login page with any username + password |
-| 🔑 **Admin** | Use the `admin_invite_code` from `.env` during registration |
+| 🎓 **Student / User** | Register on the login page with any username or email + password |
 
 ---
 
@@ -297,8 +299,12 @@ stark-industries/
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=22&duration=3000&pause=1000&color=FFD700&center=true&vCenter=true&width=500&lines=Built+by+H4ckWSharon;Red+Team+%7C+CTF+Player+%7C+Developer" alt="Author" />
+### Built by **Sharon Anil**
+**Ethical Hacker & Pentester**
 
+<br/>
+
+[![YouTube](https://img.shields.io/badge/YouTube-HackWSharon-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@HackWSharon)
 [![GitHub](https://img.shields.io/badge/GitHub-H4ckWSharon-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/H4ckWSharon)
 
 </div>
