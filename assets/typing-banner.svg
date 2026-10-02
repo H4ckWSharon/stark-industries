@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 65" width="100%" height="65">
+  <defs>
+    <filter id="glow-neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes line-cycle-1 {
+      0%, 28% { opacity: 1; transform: translateY(0); }
+      33%, 95% { opacity: 0; transform: translateY(-8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes line-cycle-2 {
+      0%, 28% { opacity: 0; transform: translateY(8px); }
+      33%, 61% { opacity: 1; transform: translateY(0); }
+      66%, 100% { opacity: 0; transform: translateY(-8px); }
+    }
+    @keyframes line-cycle-3 {
+      0%, 61% { opacity: 0; transform: translateY(8px); }
+      66%, 95% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-8px); }
+    }
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .text-1 {
+      animation: line-cycle-1 12s infinite;
+      font-family: 'Share Tech Mono', Consolas, 'Courier New', monospace;
+    }
+    .text-2 {
+      animation: line-cycle-2 12s infinite;
+      font-family: 'Share Tech Mono', Consolas, 'Courier New', monospace;
+    }
+    .text-3 {
+      animation: line-cycle-3 12s infinite;
+      font-family: 'Share Tech Mono', Consolas, 'Courier New', monospace;
+    }
+    .cursor {
+      animation: blink 0.8s infinite;
+    }
+  </style>
+
+  <!-- Background plate -->
+  <rect x="10" y="8" width="880" height="50" rx="8" fill="#080c14" stroke="#182335" stroke-width="1.5" />
+  
+  <!-- Left HUD prompt symbol -->
+  <text x="30" y="40" font-family="Consolas, monospace" font-size="20" font-weight="900" fill="#FF2244">&gt;&gt;</text>
+
+  <!-- Line 1: Stark Industries Cyber Range -->
+  <g class="text-1">
+    <text x="65" y="39" font-size="18" font-weight="700" fill="#00D4FF" letter-spacing="1.5" filter="url(#glow-neon)">
+      ⚡ STARK INDUSTRIES CYBER RANGE // 30 TARGET SQL LABS ACTIVE
+    </text>
+  </g>
+
+  <!-- Line 2: Databases & Categories -->
+  <g class="text-2">
+    <text x="65" y="39" font-size="18" font-weight="700" fill="#FFD700" letter-spacing="1.5" filter="url(#glow-neon)">
+      🛡️ 4 DB ENGINES: MYSQL · POSTGRESQL · MSSQL · SQLITE | RED TEAM TRAINING
+    </text>
+  </g>
+
+  <!-- Line 3: Sharon Anil Cyber Range -->
+  <g class="text-3">
+    <text x="65" y="39" font-size="18" font-weight="700" fill="#00FF88" letter-spacing="1.5" filter="url(#glow-neon)">
+      💀 EXPLOIT · ESCALATE · CAPTURE FLAGS // BUILT BY SHARON ANIL
+    </text>
+  </g>
+
+  <!-- Blinking Cursor -->
+  <rect x="840" y="24" width="10" height="18" fill="#00F0FF" class="cursor" filter="url(#glow-neon)" />
+</svg>
