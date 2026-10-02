@@ -4,7 +4,7 @@
 
 <br/><br/>
 
-<img src="assets/typing-banner.svg" alt="Stark Industries Cyber Range" width="850" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=26&duration=2500&pause=1000&color=FF2244&center=true&vCenter=true&width=750&lines=STARK+INDUSTRIES+SQL;30+Vulnerable+Challenge+Labs;SQL+Injection+Training+Platform;Built+by+Sharon+Anil" alt="Stark Industries SQL" />
 
 <br/>
 
@@ -14,10 +14,6 @@
 [![Python](https://img.shields.io/badge/Python-3.12-FFD700?style=for-the-badge&logo=python&logoColor=black)](https://python.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Vite-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![License](https://img.shields.io/badge/License-Educational-FF2244?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#)
-
-<br/><br/>
-
-<img src="assets/cyber-divider.svg" alt="Divider" width="100%" />
 
 </div>
 
@@ -281,7 +277,7 @@ stark-industries/
 
 <div align="center">
 
-<img src="assets/skills-animation.svg" alt="Sharon Anil Skills" width="850" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=600&size=22&duration=2500&pause=1000&color=FFB800&center=true&vCenter=true&width=700&lines=Built+by+Sharon+Anil;Ethical+Hacker+%26+Pentester;CTF+Player+%7C+Web+Developer;Hardware+Hacking" alt="Sharon Anil Skills" />
 
 <br/><br/>
 
@@ -304,10 +300,6 @@ stark-industries/
 <br/><br/>
 
 > 📺 **Subscribe on YouTube:** [youtube.com/@HackWSharon](https://www.youtube.com/@HackWSharon) — Ethical Hacking, CTF Walkthroughs & Cyber Defense tutorials!
-
-<br/>
-
-<img src="assets/cyber-divider.svg" alt="Divider" width="100%" />
 
 </div>
 
